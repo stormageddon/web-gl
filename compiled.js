@@ -6,12 +6,13 @@ console.log("Loaded game.js");
 var Game = Game || {};
 var Renderer = require('./Renderer');
 var Player = require('./Player');
+var Goal = require('./Goal');
 var Input = require('./Input');
 
 var ONE_FRAME_TIME = 1000 / 60;
 var renderer = new Renderer();
 var running = true;
-var player = new Player(200, 200, 'green', renderer);
+var player = new Player(200, 200, 'RIGHT', 'green', renderer);
 
 var Game = function() {
   console.log("Created a new Game");
@@ -34,8 +35,13 @@ Game.prototype.run = function() {
 
 var tick = function() {
   console.log("Tick");
-  renderer.tick();
-  player.tick();
+  var goal = renderer.tick();
+  var pLoc = player.tick();
+  var wasCollision = checkForCollision(pLoc, goal.location());
+  if (wasCollision) {
+    player.grow();
+    goal.regenerate();
+  }
 }
 
 var render = function() {
@@ -44,16 +50,109 @@ var render = function() {
   player.draw();
 }
 
+var checkForCollision = function(pLoc, gLoc) {
+  console.log("Checking player loc:", pLoc);
+  console.log("Checking goal loc:", gLoc);
+  var pX = pLoc.x
+  var pY = pLoc.y
+  var gX = gLoc.x
+  var gY = gLoc.y
+
+  var pSize = player.size()
+
+
+
+/*
+ * if (rect1.x < rect2.x + rect2.width &&
+   rect1.x + rect1.width > rect2.x &&
+   rect1.y < rect2.y + rect2.height &&
+   rect1.height + rect1.y > rect2.y)
+ */
+
+  // rect1 = pLoc, rect2 = gLoc
+
+  if (pLoc.x < gLoc.x + 9 &&
+      pLoc.x + pSize.w - 1 > gLoc.x &&
+      pLoc.y < gLoc.y + 9 &&
+      pSize.h + pLoc.y - 1 > gLoc.y) {
+
+      return true
+  }
+
+  return false
+
+}
+
 Game.prototype.quit = function() {
   running = false;
+}
+
+var endGame = function() {
+  console.log("Game is over!");
+  alert('Game is over');
 }
 
 document.addEventListener('pause', function() {
   running = !running
 });
 
+document.addEventListener('Game Over', function() {
+  running = false;
+  endGame();
+});
+
 module.exports = Game
-},{"./Input":2,"./Player":3,"./Renderer":4}],2:[function(require,module,exports){
+},{"./Goal":2,"./Input":3,"./Player":4,"./Renderer":5}],2:[function(require,module,exports){
+'use strict'
+
+var Goal = Goal || {}
+
+var xLoc;
+var yLoc;
+var w;
+var h;
+var fillColor = 'red';
+var exists = false;
+
+var Goal = function() {
+  w = 10;
+  h = 10;
+}
+
+Goal.prototype.exists = function() {
+  console.log("Exists:", exists);
+  return exists;
+}
+
+Goal.prototype.generate = function(xBoundary, yBoundary) {
+  var xB = xBoundary - w;
+  if (xB <= 0) xB = 0;
+  var yB = yBoundary - h;
+  if (yB >= (120*4)) yB = 120*4 - h;
+  xLoc = Math.floor(Math.random() * xBoundary);
+  yLoc = Math.floor(Math.random() * yBoundary);
+  console.log("Generating goal at", xLoc, yLoc);
+  exists = true;
+}
+
+Goal.prototype.location = function() {
+  return {x: xLoc, y: yLoc}
+}
+
+Goal.prototype.dimensions = function() {
+  return {w: w, h: h}
+}
+
+Goal.prototype.color = function() {
+  return fillColor;
+}
+
+Goal.prototype.regenerate = function() {
+  exists = false;
+}
+
+module.exports = Goal
+},{}],3:[function(require,module,exports){
 'use strict'
 
 var Input = function() {
@@ -92,63 +191,121 @@ document.onkeypress = function(e) {
 
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict'
 
 var Player = Player || {};
 
-var xLoc;
-var yLoc;
-var SPEED = 20;
-var w = 100;
-var h = 100;
+var xLoc; // X coord of head
+var yLoc; // Y coord of head
+var tail = [];
+var SPEED = 3;
+var w = 15;
+var h = 15;
+var direction;
 var r;
 var col;
+var GROWTH_FACTOR = 10;
 
-var Player = function(x, y, color, Renderer) {
+
+var Player = function(x, y, startingDir, color, Renderer) {
   console.log("Created a player", x);
   xLoc = x;
   yLoc = y;
+  direction = startingDir
   col = color;
   r = Renderer;
+  tail.push({x: xLoc + 10, y: yLoc});
+  tail.push({x: xLoc + 20, y: yLoc});
+}
+
+var move = function() {
+  var prevHeadLoc = {x: xLoc, y: yLoc};
+  if( direction === 'RIGHT' ) {
+    xLoc += SPEED;
+    if(xLoc + w - 5 > canvas.width) document.dispatchEvent( new Event('Game Over'))
+  }
+  if( direction === 'LEFT' ) {
+    xLoc -= SPEED;
+    if(xLoc < -5) document.dispatchEvent(new Event('Game Over'));
+  }
+  if( direction === 'UP' ) {
+    yLoc -= SPEED;
+    if(yLoc < -5) document.dispatchEvent(new Event('Game Over'));
+  }
+  if( direction === 'DOWN' ) {
+    yLoc += SPEED;
+    if(yLoc + h - 5 > canvas.height) document.dispatchEvent( new Event('Game Over'))
+  }
+
+  moveTail(prevHeadLoc);
+}
+
+var moveTail = function(prevHeadLoc) {
+  var next = tail[0];
+
+  console.log("tail:", tail);
+  for (var i = 0; i < tail.length; i++) {
+    if (i === 0) {
+      tail[i].x = prevHeadLoc.x;
+      tail[i].y = prevHeadLoc.y;
+      continue;
+    }
+
+    var tmp = tail[i + 1];
+    if (!tmp) {
+      return;
+    }
+
+    tail[i + 1].x = next.x;
+    tail[i + 1].y = next.y;
+
+    next = tmp;
+
+  }
+}
+
+
+Player.prototype.size = function() {
+  return {w: w, h: h};
+}
+
+Player.prototype.grow = function() {
+  if (tail.length === 0) {
+    tail.push ({ x: xLoc + GROWTH_FACTOR, y: yLoc + GROWTH_FACTOR });
+    return;
+  }
+  var tailEnd = tail[tail.length - 1]
+  var newCoord = { x: tailEnd.x + GROWTH_FACTOR, y: tailEnd.y + GROWTH_FACTOR }
+  tail.push(newCoord);
 }
 
 Player.prototype.tick = function() {
-
+  move();
+  return {x: xLoc, y: yLoc};
 }
 
 Player.prototype.draw = function() {
   console.log("Drawing player", xLoc);
+  // Draw head
   r.getContext().fillStyle = col;
   r.getContext().fillRect(xLoc, yLoc, w, h);
+
+  // Draw tail
+  for(var i = 0; i < tail.length - 1; i++) {
+    console.log("Drawing tail part", i);
+    console.log("tail", tail);
+    r.getContext().fillRect(tail[i].x, tail[i].y, w, h);
+  }
 }
 
 document.addEventListener('move', function(e) {
   console.log("e:", e);
-  if (e.detail.toUpperCase() === 'LEFT') {
-    console.log('left')
-    xLoc -= SPEED;
-    if(xLoc < 0) xLoc = 0;
-  }
-
-  if (e.detail.toUpperCase() === 'UP') {
-    yLoc -= SPEED;
-    if(yLoc < 0) yLoc = 0;
-  }
-
-  if (e.detail.toUpperCase() === 'RIGHT') {
-    xLoc = xLoc + SPEED;
-    if(xLoc + w > canvas.width) xLoc = canvas.width - w;
-  }
-
-  if (e.detail.toUpperCase() === 'DOWN') {
-    yLoc += SPEED;
-    if(yLoc + h > canvas.height) yLoc = canvas.height - h;
-  }
+  direction = e.detail.toUpperCase();
 });
 
 module.exports = Player
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict'
 
 console.log("loaded renderer.js");
@@ -167,16 +324,17 @@ var WIDTH = 160;
 var HEIGHT = 120;
 var SCALE = 4;
 
-
-var xLoc = 10
-var yLoc = 10
-var w = 100
-var h = 100
+var Goal = require('./Goal');
+var goal = new Goal();
+var xLoc = 10;
+var yLoc = 10;
+var w = 100;
+var h = 100;
 var rot = 0;
 var rotDelta = 10;
-var col = "red"
-var colors = ["red", "blue", "green", "yellow", "black", "pink"]
-var pixels = []
+var col = "red";
+var colors = ["red", "blue", "green", "yellow", "black", "pink"];
+var pixels = [];
 
 context.canvas.height = HEIGHT*SCALE;
 context.canvas.width = WIDTH*SCALE;
@@ -184,14 +342,20 @@ context.canvas.width = WIDTH*SCALE;
 context.fillStyle = col
 
 Renderer.prototype.tick = function() {
-  xLoc += SPEED;
-  col = colors[Math.floor(Math.random() * colors.length)]
+  if (!goal.exists()) {
+    goal.generate(WIDTH * SCALE, HEIGHT * SCALE);
+  }
+  return goal;
 }
 
 Renderer.prototype.draw = function() {
   clear();
-  context.fillStyle = col
-  context.fillRect(xLoc, yLoc, w, h);
+  context.fillStyle = goal.color();
+  console.log(goal.location());
+  var loc = goal.location();
+  var size = goal.dimensions();
+  console.log("Drawing Goal:", loc.x, loc.y, size.w, size.w);
+  context.fillRect(loc.x, loc.y, size.w, size.h);
 }
 
 Renderer.prototype.getContext = function() {
@@ -203,13 +367,15 @@ var clear = function() {
 }
 
 module.exports = Renderer
-},{}],5:[function(require,module,exports){
+},{"./Goal":2}],6:[function(require,module,exports){
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 arguments[4][1][0].apply(exports,arguments)
-},{"./Input":2,"./Player":3,"./Renderer":4,"dup":1}],7:[function(require,module,exports){
+},{"./Goal":2,"./Input":3,"./Player":4,"./Renderer":5,"dup":1}],8:[function(require,module,exports){
 arguments[4][2][0].apply(exports,arguments)
-},{"dup":2}],8:[function(require,module,exports){
+},{"dup":2}],9:[function(require,module,exports){
+arguments[4][3][0].apply(exports,arguments)
+},{"dup":3}],10:[function(require,module,exports){
 // window makes this targetable outside the bundle
 window.startGame = function() {
   var Game = require('./Game');
@@ -219,8 +385,8 @@ window.startGame = function() {
   game.run();
 }
 
-},{"./Game":1}],9:[function(require,module,exports){
-arguments[4][3][0].apply(exports,arguments)
-},{"dup":3}],10:[function(require,module,exports){
+},{"./Game":1}],11:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}]},{},[5,6,7,8,9,10]);
+},{"dup":4}],12:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"./Goal":2,"dup":5}]},{},[6,7,8,9,10,11,12]);
