@@ -15,7 +15,6 @@ var Goal = function() {
 }
 
 Goal.prototype.exists = function() {
-  console.log("Exists:", exists);
   return exists;
 }
 
@@ -26,7 +25,6 @@ Goal.prototype.generate = function(xBoundary, yBoundary) {
   if (yB >= (120*4)) yB = 120*4 - h;
   xLoc = Math.floor(Math.random() * xBoundary);
   yLoc = Math.floor(Math.random() * yBoundary);
-  console.log("Generating goal at", xLoc, yLoc);
   exists = true;
 }
 

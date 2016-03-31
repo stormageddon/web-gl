@@ -33,25 +33,23 @@ Game.prototype.run = function() {
 }
 
 var tick = function() {
-  console.log("Tick");
   var goal = renderer.tick();
   var pLoc = player.tick();
   var wasCollision = checkForCollision(pLoc, goal.location());
   if (wasCollision) {
+    player.addPoints(10);
     player.grow();
     goal.regenerate();
+    document.getElementById("points").innerHTML = 'Points: ' + player.getPoints();
   }
 }
 
 var render = function() {
-  console.log("Render");
   renderer.draw();
   player.draw();
 }
 
 var checkForCollision = function(pLoc, gLoc) {
-  console.log("Checking player loc:", pLoc);
-  console.log("Checking goal loc:", gLoc);
   var pX = pLoc.x
   var pY = pLoc.y
   var gX = gLoc.x
@@ -87,7 +85,6 @@ Game.prototype.quit = function() {
 }
 
 var endGame = function() {
-  console.log("Game is over!");
   alert('Game is over');
 }
 

@@ -34,25 +34,23 @@ Game.prototype.run = function() {
 }
 
 var tick = function() {
-  console.log("Tick");
   var goal = renderer.tick();
   var pLoc = player.tick();
   var wasCollision = checkForCollision(pLoc, goal.location());
   if (wasCollision) {
+    player.addPoints(10);
     player.grow();
     goal.regenerate();
+    document.getElementById("points").innerHTML = 'Points: ' + player.getPoints();
   }
 }
 
 var render = function() {
-  console.log("Render");
   renderer.draw();
   player.draw();
 }
 
 var checkForCollision = function(pLoc, gLoc) {
-  console.log("Checking player loc:", pLoc);
-  console.log("Checking goal loc:", gLoc);
   var pX = pLoc.x
   var pY = pLoc.y
   var gX = gLoc.x
@@ -88,7 +86,6 @@ Game.prototype.quit = function() {
 }
 
 var endGame = function() {
-  console.log("Game is over!");
   alert('Game is over');
 }
 
@@ -120,7 +117,6 @@ var Goal = function() {
 }
 
 Goal.prototype.exists = function() {
-  console.log("Exists:", exists);
   return exists;
 }
 
@@ -131,7 +127,6 @@ Goal.prototype.generate = function(xBoundary, yBoundary) {
   if (yB >= (120*4)) yB = 120*4 - h;
   xLoc = Math.floor(Math.random() * xBoundary);
   yLoc = Math.floor(Math.random() * yBoundary);
-  console.log("Generating goal at", xLoc, yLoc);
   exists = true;
 }
 
@@ -200,16 +195,16 @@ var xLoc; // X coord of head
 var yLoc; // Y coord of head
 var tail = [];
 var SPEED = 3;
-var w = 15;
-var h = 15;
+var w = 10;
+var h = 10;
 var direction;
 var r;
 var col;
-var GROWTH_FACTOR = 10;
+var GROWTH_FACTOR = 100;
+var points = 0;
 
 
 var Player = function(x, y, startingDir, color, Renderer) {
-  console.log("Created a player", x);
   xLoc = x;
   yLoc = y;
   direction = startingDir
@@ -217,6 +212,14 @@ var Player = function(x, y, startingDir, color, Renderer) {
   r = Renderer;
   tail.push({x: xLoc + 10, y: yLoc});
   tail.push({x: xLoc + 20, y: yLoc});
+}
+
+Player.prototype.addPoints = function(numPoints) {
+  points += numPoints;
+}
+
+Player.prototype.getPoints = function() {
+  return points;
 }
 
 var move = function() {
@@ -242,27 +245,11 @@ var move = function() {
 }
 
 var moveTail = function(prevHeadLoc) {
-  var next = tail[0];
+  var t = tail.pop();
+  t.x = prevHeadLoc.x;
+  t.y = prevHeadLoc.y;
 
-  console.log("tail:", tail);
-  for (var i = 0; i < tail.length; i++) {
-    if (i === 0) {
-      tail[i].x = prevHeadLoc.x;
-      tail[i].y = prevHeadLoc.y;
-      continue;
-    }
-
-    var tmp = tail[i + 1];
-    if (!tmp) {
-      return;
-    }
-
-    tail[i + 1].x = next.x;
-    tail[i + 1].y = next.y;
-
-    next = tmp;
-
-  }
+  tail.unshift(t);
 }
 
 
@@ -286,21 +273,17 @@ Player.prototype.tick = function() {
 }
 
 Player.prototype.draw = function() {
-  console.log("Drawing player", xLoc);
   // Draw head
   r.getContext().fillStyle = col;
   r.getContext().fillRect(xLoc, yLoc, w, h);
 
   // Draw tail
   for(var i = 0; i < tail.length - 1; i++) {
-    console.log("Drawing tail part", i);
-    console.log("tail", tail);
     r.getContext().fillRect(tail[i].x, tail[i].y, w, h);
   }
 }
 
 document.addEventListener('move', function(e) {
-  console.log("e:", e);
   direction = e.detail.toUpperCase();
 });
 
@@ -319,10 +302,9 @@ var Renderer = function() {
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
 
-var SPEED = .5;
 var WIDTH = 160;
 var HEIGHT = 120;
-var SCALE = 4;
+var SCALE = 2;
 
 var Goal = require('./Goal');
 var goal = new Goal();

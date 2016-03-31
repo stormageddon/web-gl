@@ -11,10 +11,9 @@ var Renderer = function() {
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
 
-var SPEED = .5;
 var WIDTH = 160;
 var HEIGHT = 120;
-var SCALE = 4;
+var SCALE = 2;
 
 var Goal = require('./Goal');
 var goal = new Goal();
