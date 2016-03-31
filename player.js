@@ -95,6 +95,16 @@ Player.prototype.draw = function() {
 }
 
 document.addEventListener('move', function(e) {
+  var newDirection = e.detail.toUpperCase();
+
+  // Do no allow 180 changes
+  if ( (direction === 'UP' && newDirection === 'DOWN')
+       || (direction === 'DOWN' && newDirection === 'UP')
+       || (direction === 'LEFT' && newDirection === 'RIGHT')
+       || (direction === 'RIGHT' && newDirection === 'LEFT')
+  ) {
+    return;
+  }
   direction = e.detail.toUpperCase();
 });
 

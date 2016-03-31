@@ -12,7 +12,7 @@ var Input = require('./Input');
 var ONE_FRAME_TIME = 1000 / 60;
 var renderer = new Renderer();
 var running = true;
-var player = new Player(200, 200, 'RIGHT', 'green', renderer);
+var player = new Player(50, 200, 'RIGHT', 'green', renderer);
 
 var Game = function() {
   console.log("Created a new Game");
@@ -20,7 +20,7 @@ var Game = function() {
 
 Game.prototype.newGame = function() {
   console.log("Starting a new game");
-
+  render();
 }
 
 var mainLoop = function(game) {
@@ -284,6 +284,16 @@ Player.prototype.draw = function() {
 }
 
 document.addEventListener('move', function(e) {
+  var newDirection = e.detail.toUpperCase();
+
+  // Do no allow 180 changes
+  if ( (direction === 'UP' && newDirection === 'DOWN')
+       || (direction === 'DOWN' && newDirection === 'UP')
+       || (direction === 'LEFT' && newDirection === 'RIGHT')
+       || (direction === 'RIGHT' && newDirection === 'LEFT')
+  ) {
+    return;
+  }
   direction = e.detail.toUpperCase();
 });
 
@@ -358,15 +368,18 @@ arguments[4][2][0].apply(exports,arguments)
 },{"dup":2}],9:[function(require,module,exports){
 arguments[4][3][0].apply(exports,arguments)
 },{"dup":3}],10:[function(require,module,exports){
+var game;
+
 // window makes this targetable outside the bundle
 window.startGame = function() {
-  var Game = require('./Game');
-  console.log("Start the damn game");
-  var game = new Game();
-  game.newGame();
   game.run();
 }
 
+window.drawNewGame = function() {
+  var Game = require('./Game');
+  game = new Game();
+  game.newGame();
+}
 },{"./Game":1}],11:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
 },{"dup":4}],12:[function(require,module,exports){

@@ -11,7 +11,7 @@ var Input = require('./Input');
 var ONE_FRAME_TIME = 1000 / 60;
 var renderer = new Renderer();
 var running = true;
-var player = new Player(200, 200, 'RIGHT', 'green', renderer);
+var player = new Player(50, 200, 'RIGHT', 'green', renderer);
 
 var Game = function() {
   console.log("Created a new Game");
@@ -19,7 +19,7 @@ var Game = function() {
 
 Game.prototype.newGame = function() {
   console.log("Starting a new game");
-
+  render();
 }
 
 var mainLoop = function(game) {
