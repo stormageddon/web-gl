@@ -18,7 +18,7 @@ var Game = function() {
     player.reset();
   }
   document.getElementById("points").innerHTML = 'Points: 0';
-  player = new Player(200, 200, 'RIGHT', 'green', renderer);
+  player = new Player(200, 200, 'RIGHT', '#1ec503', renderer);
 };
 
 Game.prototype.newGame = function() {

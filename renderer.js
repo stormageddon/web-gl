@@ -46,8 +46,10 @@ Renderer.prototype.draw = function() {
 }
 
 Renderer.prototype.drawPause = function() {
+  context.fillStyle = "#ffffff";
   context.font = "20px Georgia";
   context.fillText("Press 'P' to unpause", WIDTH*SCALE / 4, HEIGHT*SCALE / 2);
+  context.fillStyle = "#000000";
 }
 
 Renderer.prototype.getContext = function() {
