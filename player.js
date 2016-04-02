@@ -23,9 +23,14 @@ var Player = function(x, y, startingDir, color, Renderer) {
 
   var length = 4;
   for (var i = length; i >= 0; i--) {
-    console.log(i);
     snake.push({x: i, y: 0});
   }
+}
+
+Player.prototype.reset = function() {
+  points = 0;
+  direction = 'RIGHT';
+  snake = [];
 }
 
 Player.prototype.addPoints = function(numPoints) {

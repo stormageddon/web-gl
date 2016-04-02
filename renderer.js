@@ -1,7 +1,5 @@
 'use strict'
 
-console.log("loaded renderer.js");
-
 var Renderer = Renderer || {}
 
 var Renderer = function() {
@@ -42,11 +40,14 @@ Renderer.prototype.tick = function() {
 Renderer.prototype.draw = function() {
   clear();
   context.fillStyle = goal.color();
-  console.log(goal.location());
   var loc = goal.location();
   var size = goal.dimensions();
-  console.log("Drawing Goal:", loc.x, loc.y, size.w, size.w);
   context.fillRect(loc.x * size.w, loc.y * size.h, size.w, size.h);
+}
+
+Renderer.prototype.drawPause = function() {
+  context.font = "20px Georgia";
+  context.fillText("Press 'P' to unpause", WIDTH*SCALE / 4, HEIGHT*SCALE / 2);
 }
 
 Renderer.prototype.getContext = function() {

@@ -8,14 +8,23 @@ var Goal = require('./Goal');
 var Input = require('./Input');
 
 var ONE_FRAME_TIME = 60;
-var renderer = new Renderer();
-var running = false;
-var player = new Player(200, 200, 'RIGHT', 'green', renderer);
+var renderer; // = new Renderer();
+var running; // = false;
+var player; // = new Player(200, 200, 'RIGHT', 'green', renderer);
 
 var Game = function() {
+  renderer = new Renderer();
+  running = false;
+  if (player) {
+    player.reset();
+  }
+  document.getElementById("points").innerHTML = 'Points: 0';
+  player = new Player(200, 200, 'RIGHT', 'green', renderer);
 };
 
 Game.prototype.newGame = function() {
+  renderer.clear();
+  render()
 }
 
 var mainLoop = function(game) {
@@ -24,9 +33,12 @@ var mainLoop = function(game) {
   render();
 }
 
+var runIntervalID;
+
 Game.prototype.run = function() {
-  setInterval( mainLoop, ONE_FRAME_TIME );
+  runIntervalID = setInterval( mainLoop, ONE_FRAME_TIME );
   running = true;
+  document.getElementById("startBtn").disabled = true
 }
 
 var tick = function() {
@@ -46,39 +58,9 @@ var render = function() {
   player.draw();
 }
 
+// Checks for collision with Goal
 var checkForCollision = function(pLoc, gLoc) {
-
-
   return pLoc.x === gLoc.x && pLoc.y === gLoc.y;
-
-  var pX = pLoc.x
-  var pY = pLoc.y
-  var gX = gLoc.x
-  var gY = gLoc.y
-
-  var pSize = player.size()
-
-
-
-/*
- * if (rect1.x < rect2.x + rect2.width &&
-   rect1.x + rect1.width > rect2.x &&
-   rect1.y < rect2.y + rect2.height &&
-   rect1.height + rect1.y > rect2.y)
- */
-
-  // rect1 = pLoc, rect2 = gLoc
-
-  if (pLoc.x < gLoc.x + 9 &&
-      pLoc.x + pSize.w - 1 > gLoc.x &&
-      pLoc.y < gLoc.y + 9 &&
-      pSize.h + pLoc.y - 1 > gLoc.y) {
-
-      return true
-  }
-
-  return false
-
 }
 
 Game.prototype.quit = function() {
@@ -86,16 +68,25 @@ Game.prototype.quit = function() {
 }
 
 var endGame = function() {
-  alert('Game is over');
+  if (running === true) {
+    alert('Game is over');
+    clearInterval(runIntervalID);
+  }
+  document.getElementById("startBtn").disabled = false;
+  return;
 }
 
 document.addEventListener('pause', function() {
+  if (running) {
+    // Pause the game
+    renderer.drawPause();
+  }
   running = !running
 });
 
 document.addEventListener('Game Over', function() {
-  running = false;
   endGame();
+  running = false;
 });
 
 module.exports = Game
@@ -159,10 +150,9 @@ document.onkeydown = function(e) {
   var event;
 
   e = e || window.event
-  var charCode = e.keyCode
+  var charCode = e.keyCode || e.which
 
-  if (charCode === 112) {
-    console.log("pause");
+  if (charCode === 80) {
     event = new Event('pause');
   }
 
@@ -182,7 +172,9 @@ document.onkeydown = function(e) {
     event = new CustomEvent('move', { 'detail': 'down' });
   }
 
-  document.dispatchEvent(event);
+  if (event) {
+    document.dispatchEvent(event);
+  }
 
 }
 
@@ -212,9 +204,14 @@ var Player = function(x, y, startingDir, color, Renderer) {
 
   var length = 4;
   for (var i = length; i >= 0; i--) {
-    console.log(i);
     snake.push({x: i, y: 0});
   }
+}
+
+Player.prototype.reset = function() {
+  points = 0;
+  direction = 'RIGHT';
+  snake = [];
 }
 
 Player.prototype.addPoints = function(numPoints) {
@@ -314,8 +311,6 @@ module.exports = Player
 },{}],5:[function(require,module,exports){
 'use strict'
 
-console.log("loaded renderer.js");
-
 var Renderer = Renderer || {}
 
 var Renderer = function() {
@@ -356,11 +351,14 @@ Renderer.prototype.tick = function() {
 Renderer.prototype.draw = function() {
   clear();
   context.fillStyle = goal.color();
-  console.log(goal.location());
   var loc = goal.location();
   var size = goal.dimensions();
-  console.log("Drawing Goal:", loc.x, loc.y, size.w, size.w);
   context.fillRect(loc.x * size.w, loc.y * size.h, size.w, size.h);
+}
+
+Renderer.prototype.drawPause = function() {
+  context.font = "20px Georgia";
+  context.fillText("Press 'P' to unpause", WIDTH*SCALE / 4, HEIGHT*SCALE / 2);
 }
 
 Renderer.prototype.getContext = function() {
@@ -385,15 +383,18 @@ arguments[4][2][0].apply(exports,arguments)
 },{"dup":2}],9:[function(require,module,exports){
 arguments[4][3][0].apply(exports,arguments)
 },{"dup":3}],10:[function(require,module,exports){
+var Game = require('./Game');
 var game;
 
 // window makes this targetable outside the bundle
 window.startGame = function() {
+  game = null;
+  game = new Game();
+  game.newGame();
   game.run();
 }
 
 window.drawNewGame = function() {
-  var Game = require('./Game');
   game = new Game();
   game.newGame();
 }

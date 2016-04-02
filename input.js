@@ -9,10 +9,9 @@ document.onkeydown = function(e) {
   var event;
 
   e = e || window.event
-  var charCode = e.keyCode
+  var charCode = e.keyCode || e.which
 
-  if (charCode === 112) {
-    console.log("pause");
+  if (charCode === 80) {
     event = new Event('pause');
   }
 
@@ -32,6 +31,8 @@ document.onkeydown = function(e) {
     event = new CustomEvent('move', { 'detail': 'down' });
   }
 
-  document.dispatchEvent(event);
+  if (event) {
+    document.dispatchEvent(event);
+  }
 
 }

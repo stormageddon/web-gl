@@ -7,14 +7,23 @@ var Goal = require('./Goal');
 var Input = require('./Input');
 
 var ONE_FRAME_TIME = 60;
-var renderer = new Renderer();
-var running = false;
-var player = new Player(200, 200, 'RIGHT', 'green', renderer);
+var renderer; // = new Renderer();
+var running; // = false;
+var player; // = new Player(200, 200, 'RIGHT', 'green', renderer);
 
 var Game = function() {
+  renderer = new Renderer();
+  running = false;
+  if (player) {
+    player.reset();
+  }
+  document.getElementById("points").innerHTML = 'Points: 0';
+  player = new Player(200, 200, 'RIGHT', 'green', renderer);
 };
 
 Game.prototype.newGame = function() {
+  renderer.clear();
+  render()
 }
 
 var mainLoop = function(game) {
@@ -23,9 +32,12 @@ var mainLoop = function(game) {
   render();
 }
 
+var runIntervalID;
+
 Game.prototype.run = function() {
-  setInterval( mainLoop, ONE_FRAME_TIME );
+  runIntervalID = setInterval( mainLoop, ONE_FRAME_TIME );
   running = true;
+  document.getElementById("startBtn").disabled = true
 }
 
 var tick = function() {
@@ -45,39 +57,9 @@ var render = function() {
   player.draw();
 }
 
+// Checks for collision with Goal
 var checkForCollision = function(pLoc, gLoc) {
-
-
   return pLoc.x === gLoc.x && pLoc.y === gLoc.y;
-
-  var pX = pLoc.x
-  var pY = pLoc.y
-  var gX = gLoc.x
-  var gY = gLoc.y
-
-  var pSize = player.size()
-
-
-
-/*
- * if (rect1.x < rect2.x + rect2.width &&
-   rect1.x + rect1.width > rect2.x &&
-   rect1.y < rect2.y + rect2.height &&
-   rect1.height + rect1.y > rect2.y)
- */
-
-  // rect1 = pLoc, rect2 = gLoc
-
-  if (pLoc.x < gLoc.x + 9 &&
-      pLoc.x + pSize.w - 1 > gLoc.x &&
-      pLoc.y < gLoc.y + 9 &&
-      pSize.h + pLoc.y - 1 > gLoc.y) {
-
-      return true
-  }
-
-  return false
-
 }
 
 Game.prototype.quit = function() {
@@ -85,16 +67,25 @@ Game.prototype.quit = function() {
 }
 
 var endGame = function() {
-  alert('Game is over');
+  if (running === true) {
+    alert('Game is over');
+    clearInterval(runIntervalID);
+  }
+  document.getElementById("startBtn").disabled = false;
+  return;
 }
 
 document.addEventListener('pause', function() {
+  if (running) {
+    // Pause the game
+    renderer.drawPause();
+  }
   running = !running
 });
 
 document.addEventListener('Game Over', function() {
-  running = false;
   endGame();
+  running = false;
 });
 
 module.exports = Game
