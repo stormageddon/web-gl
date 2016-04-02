@@ -4,7 +4,7 @@ var Input = function() {
 
 }
 
-document.onkeypress = function(e) {
+document.onkeydown = function(e) {
 
   var event;
 
@@ -16,19 +16,19 @@ document.onkeypress = function(e) {
     event = new Event('pause');
   }
 
-  if (charCode === 37 || charCode === 97) { // Left Arrow
+  if (charCode === 37) { // Left Arrow
     event = new CustomEvent('move', { 'detail': 'left' });
   }
 
-  if (charCode === 38 || charCode === 119) { // Up Arrow
+  if (charCode === 38) { // Up Arrow
     event = new CustomEvent('move', { 'detail': 'up' });
   }
 
-  if (charCode === 39 || charCode === 100) { // Right Arrow
+  if (charCode === 39) { // Right Arrow
     event = new CustomEvent('move', { 'detail': 'right' });
   }
 
-  if (charCode === 40 || charCode === 115) { // Down Arrow
+  if (charCode === 40) { // Down Arrow
     event = new CustomEvent('move', { 'detail': 'down' });
   }
 

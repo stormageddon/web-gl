@@ -8,10 +8,10 @@ var Player = require('./Player');
 var Goal = require('./Goal');
 var Input = require('./Input');
 
-var ONE_FRAME_TIME = 1000 / 60;
+var ONE_FRAME_TIME = 60;
 var renderer = new Renderer();
 var running = true;
-var player = new Player(50, 200, 'RIGHT', 'green', renderer);
+var player = new Player(200, 200, 'RIGHT', 'green', renderer);
 
 var Game = function() {
   console.log("Created a new Game");
@@ -33,6 +33,7 @@ Game.prototype.run = function() {
 }
 
 var tick = function() {
+  console.log("TICK");
   var goal = renderer.tick();
   var pLoc = player.tick();
   var wasCollision = checkForCollision(pLoc, goal.location());
@@ -50,6 +51,10 @@ var render = function() {
 }
 
 var checkForCollision = function(pLoc, gLoc) {
+
+
+  return pLoc.x === gLoc.x && pLoc.y === gLoc.y;
+
   var pX = pLoc.x
   var pY = pLoc.y
   var gX = gLoc.x

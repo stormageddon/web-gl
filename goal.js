@@ -19,12 +19,12 @@ Goal.prototype.exists = function() {
 }
 
 Goal.prototype.generate = function(xBoundary, yBoundary) {
-  var xB = xBoundary - w;
-  if (xB <= 0) xB = 0;
-  var yB = yBoundary - h;
-  if (yB >= (120*4)) yB = 120*4 - h;
-  xLoc = Math.floor(Math.random() * xBoundary);
-  yLoc = Math.floor(Math.random() * yBoundary);
+
+  var x = Math.floor(Math.random()*(xBoundary));
+  var y = Math.floor(Math.random()*(yBoundary));
+
+  xLoc = x;
+  yLoc = y;
   exists = true;
 }
 

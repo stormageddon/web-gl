@@ -9,10 +9,10 @@ var Player = require('./Player');
 var Goal = require('./Goal');
 var Input = require('./Input');
 
-var ONE_FRAME_TIME = 1000 / 60;
+var ONE_FRAME_TIME = 60;
 var renderer = new Renderer();
 var running = true;
-var player = new Player(50, 200, 'RIGHT', 'green', renderer);
+var player = new Player(200, 200, 'RIGHT', 'green', renderer);
 
 var Game = function() {
   console.log("Created a new Game");
@@ -34,6 +34,7 @@ Game.prototype.run = function() {
 }
 
 var tick = function() {
+  console.log("TICK");
   var goal = renderer.tick();
   var pLoc = player.tick();
   var wasCollision = checkForCollision(pLoc, goal.location());
@@ -51,6 +52,10 @@ var render = function() {
 }
 
 var checkForCollision = function(pLoc, gLoc) {
+
+
+  return pLoc.x === gLoc.x && pLoc.y === gLoc.y;
+
   var pX = pLoc.x
   var pY = pLoc.y
   var gX = gLoc.x
@@ -121,12 +126,12 @@ Goal.prototype.exists = function() {
 }
 
 Goal.prototype.generate = function(xBoundary, yBoundary) {
-  var xB = xBoundary - w;
-  if (xB <= 0) xB = 0;
-  var yB = yBoundary - h;
-  if (yB >= (120*4)) yB = 120*4 - h;
-  xLoc = Math.floor(Math.random() * xBoundary);
-  yLoc = Math.floor(Math.random() * yBoundary);
+
+  var x = Math.floor(Math.random()*(xBoundary));
+  var y = Math.floor(Math.random()*(yBoundary));
+
+  xLoc = x;
+  yLoc = y;
   exists = true;
 }
 
@@ -154,7 +159,7 @@ var Input = function() {
 
 }
 
-document.onkeypress = function(e) {
+document.onkeydown = function(e) {
 
   var event;
 
@@ -166,19 +171,19 @@ document.onkeypress = function(e) {
     event = new Event('pause');
   }
 
-  if (charCode === 37 || charCode === 97) { // Left Arrow
+  if (charCode === 37) { // Left Arrow
     event = new CustomEvent('move', { 'detail': 'left' });
   }
 
-  if (charCode === 38 || charCode === 119) { // Up Arrow
+  if (charCode === 38) { // Up Arrow
     event = new CustomEvent('move', { 'detail': 'up' });
   }
 
-  if (charCode === 39 || charCode === 100) { // Right Arrow
+  if (charCode === 39) { // Right Arrow
     event = new CustomEvent('move', { 'detail': 'right' });
   }
 
-  if (charCode === 40 || charCode === 115) { // Down Arrow
+  if (charCode === 40) { // Down Arrow
     event = new CustomEvent('move', { 'detail': 'down' });
   }
 
@@ -193,14 +198,13 @@ var Player = Player || {};
 
 var xLoc; // X coord of head
 var yLoc; // Y coord of head
-var tail = [];
-var SPEED = 3;
+var snake = [];  // Contains snake cells
+var SPEED = 2;
 var w = 10;
 var h = 10;
 var direction;
 var r;
 var col;
-var GROWTH_FACTOR = 100;
 var points = 0;
 
 
@@ -210,8 +214,14 @@ var Player = function(x, y, startingDir, color, Renderer) {
   direction = startingDir
   col = color;
   r = Renderer;
-  tail.push({x: xLoc + 10, y: yLoc});
-  tail.push({x: xLoc + 20, y: yLoc});
+
+  snake = [];
+
+  var length = 5;
+  for (var i= length; i >= 0; i--) {
+    snake.push({x: i, y: 0});
+  }
+
 }
 
 Player.prototype.addPoints = function(numPoints) {
@@ -223,33 +233,63 @@ Player.prototype.getPoints = function() {
 }
 
 var move = function() {
-  var prevHeadLoc = {x: xLoc, y: yLoc};
+  var head = snake[0];
   if( direction === 'RIGHT' ) {
-    xLoc += SPEED;
-    if(xLoc + w - 5 > canvas.width) document.dispatchEvent( new Event('Game Over'))
+    snake[0].x++;
+    if(snake[0].x > canvas.width / w) document.dispatchEvent( new Event('Game Over'))
   }
   if( direction === 'LEFT' ) {
-    xLoc -= SPEED;
-    if(xLoc < -5) document.dispatchEvent(new Event('Game Over'));
+    snake[0].x--;
+    if(snake[0].x < 0) document.dispatchEvent(new Event('Game Over'));
   }
   if( direction === 'UP' ) {
-    yLoc -= SPEED;
-    if(yLoc < -5) document.dispatchEvent(new Event('Game Over'));
+    snake[0].y--;
+    if(snake[0].y < 0) document.dispatchEvent(new Event('Game Over'));
   }
   if( direction === 'DOWN' ) {
-    yLoc += SPEED;
-    if(yLoc + h - 5 > canvas.height) document.dispatchEvent( new Event('Game Over'))
+    snake[0].y++;
+    if(snake[0].y > canvas.height / h) document.dispatchEvent( new Event('Game Over'))
   }
 
-  moveTail(prevHeadLoc);
+  moveSnake();
+
+  for (var i = 1; i < snake.length; ++i) {
+    if (checkForCollision(snake[0], snake[i])) document.dispatchEvent( new Event('Game Over') );
+  }
 }
 
-var moveTail = function(prevHeadLoc) {
-  var t = tail.pop();
-  t.x = prevHeadLoc.x;
-  t.y = prevHeadLoc.y;
 
-  tail.unshift(t);
+var checkForCollision = function(head, tailPiece) {
+  console.log("Snake:", snake);
+  console.log("HEad:", head);
+  console.log("Tail piece:", tailPiece);
+
+//  if (head.x === tailPiece.x && head.y === tailPiece.y) return true;
+
+/*  if (head.x < tailPiece.x + 11 &&
+      head.x + w > tailPiece.x &&
+      head.y - 1< tailPiece.y + 11 &&
+      h + head.y - 1 > tailPiece.y) {
+
+      return true
+  }*/
+
+//  if (head.x + SPEED === tailPiece.x && head.y + SPEED === tailPiece.y) return true;
+
+  return false
+
+}
+
+var moveSnake = function() {
+  console.log("MOVING SNAKE", snake);
+  var snake_head = snake[0]
+  var tail = snake.pop();
+  tail.x = snake_head.x;
+  tail.y = snake_head.y;
+
+  snake.unshift(tail);
+
+  console.log("MOVED SNAKE:", snake);
 }
 
 
@@ -258,28 +298,47 @@ Player.prototype.size = function() {
 }
 
 Player.prototype.grow = function() {
-  if (tail.length === 0) {
-    tail.push ({ x: xLoc + GROWTH_FACTOR, y: yLoc + GROWTH_FACTOR });
-    return;
+  var tail;
+  /*if (direction === 'RIGHT') {
+    tail = {x: snake[0].x - w, y: snake[0].y};
   }
-  var tailEnd = tail[tail.length - 1]
-  var newCoord = { x: tailEnd.x + GROWTH_FACTOR, y: tailEnd.y + GROWTH_FACTOR }
-  tail.push(newCoord);
+  if (direction === 'LEFT') {
+    tail = {x: snake[0].x + w, y: snake[0].y};
+  }
+  if (direction === 'UP') {
+    tail = {x: snake[0].x, y: snake[0].y + h};
+  }
+  if (direction === 'DOWN') {
+    tail = {x: snake[0].x + w, y: snake[0].y - h};
+  }*/
+
+  tail = {x: snake[0].x, y: snake[0].y};
+
+  console.log("Head:", snake[0]);
+  console.log("New tail:", tail);
+
+  //snake.unshift(tail);
+
+  snake.push(tail);
+
+  console.log("NEW SNAKE:", snake);
 }
 
 Player.prototype.tick = function() {
   move();
-  return {x: xLoc, y: yLoc};
+  console.log("RETURNING PLAYER HEAD POSITION:", snake[0]);
+  return snake[0]; //{x: xLoc, y: yLoc};
 }
 
 Player.prototype.draw = function() {
-  // Draw head
-  r.getContext().fillStyle = col;
-  r.getContext().fillRect(xLoc, yLoc, w, h);
+   r.getContext().fillStyle = col;
 
-  // Draw tail
-  for(var i = 0; i < tail.length - 1; i++) {
-    r.getContext().fillRect(tail[i].x, tail[i].y, w, h);
+  // Draw snake
+  for(var i = 0; i < snake.length; i++) {
+    console.log('draw snake part');
+    r.getContext().fillRect((snake[i].x * w), snake[i].y * h, w, h);
+    r.strokeStyle = 'white';
+    r.getContext().strokeRect(snake[i].x * w, snake[i].y * h, w, h);
   }
 }
 
@@ -292,9 +351,10 @@ document.addEventListener('move', function(e) {
        || (direction === 'LEFT' && newDirection === 'RIGHT')
        || (direction === 'RIGHT' && newDirection === 'LEFT')
   ) {
-    return;
+    return
   }
-  direction = e.detail.toUpperCase();
+
+  setTimeout( function() { direction = e.detail.toUpperCase(); return; }, 20 );
 });
 
 module.exports = Player
@@ -312,9 +372,9 @@ var Renderer = function() {
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
 
-var WIDTH = 160;
-var HEIGHT = 120;
-var SCALE = 2;
+var WIDTH = 450;
+var HEIGHT = 450;
+var SCALE = 1;
 
 var Goal = require('./Goal');
 var goal = new Goal();
@@ -335,7 +395,7 @@ context.fillStyle = col
 
 Renderer.prototype.tick = function() {
   if (!goal.exists()) {
-    goal.generate(WIDTH * SCALE, HEIGHT * SCALE);
+    goal.generate(40, 40);
   }
   return goal;
 }
@@ -347,11 +407,15 @@ Renderer.prototype.draw = function() {
   var loc = goal.location();
   var size = goal.dimensions();
   console.log("Drawing Goal:", loc.x, loc.y, size.w, size.w);
-  context.fillRect(loc.x, loc.y, size.w, size.h);
+  context.fillRect(loc.x * size.w, loc.y * size.h, size.w, size.h);
 }
 
 Renderer.prototype.getContext = function() {
   return context;
+}
+
+Renderer.prototype.clear = function() {
+  clear();
 }
 
 var clear = function() {

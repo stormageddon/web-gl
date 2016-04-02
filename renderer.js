@@ -11,9 +11,9 @@ var Renderer = function() {
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
 
-var WIDTH = 160;
-var HEIGHT = 120;
-var SCALE = 2;
+var WIDTH = 450;
+var HEIGHT = 450;
+var SCALE = 1;
 
 var Goal = require('./Goal');
 var goal = new Goal();
@@ -34,7 +34,7 @@ context.fillStyle = col
 
 Renderer.prototype.tick = function() {
   if (!goal.exists()) {
-    goal.generate(WIDTH * SCALE, HEIGHT * SCALE);
+    goal.generate(40, 40);
   }
   return goal;
 }
@@ -46,11 +46,15 @@ Renderer.prototype.draw = function() {
   var loc = goal.location();
   var size = goal.dimensions();
   console.log("Drawing Goal:", loc.x, loc.y, size.w, size.w);
-  context.fillRect(loc.x, loc.y, size.w, size.h);
+  context.fillRect(loc.x * size.w, loc.y * size.h, size.w, size.h);
 }
 
 Renderer.prototype.getContext = function() {
   return context;
+}
+
+Renderer.prototype.clear = function() {
+  clear();
 }
 
 var clear = function() {
