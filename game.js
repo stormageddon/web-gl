@@ -41,7 +41,7 @@ Game.prototype.run = function() {
 }
 
 var tick = function() {
-  var goal = renderer.tick();
+  var goal = renderer.tick(player.getSnake());
   var pLoc = player.tick();
   var wasCollision = checkForCollision(pLoc, goal.location());
   if (wasCollision) {

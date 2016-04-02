@@ -26,6 +26,8 @@ Goal.prototype.generate = function(xBoundary, yBoundary) {
   xLoc = x;
   yLoc = y;
   exists = true;
+
+  return {x: xLoc, y: yLoc};
 }
 
 Goal.prototype.location = function() {

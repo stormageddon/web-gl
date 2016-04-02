@@ -30,9 +30,19 @@ context.canvas.width = WIDTH*SCALE;
 
 context.fillStyle = col
 
-Renderer.prototype.tick = function() {
+var validGoalLoc = function(goal, snake) {
+  for (var i = 0; i < snake.length; i++) {
+    if (goal.x === snake[i].x && goal.y === snake[i].y) return false;
+  }
+  return true;
+}
+
+Renderer.prototype.tick = function(snake) {
   if (!goal.exists()) {
-    goal.generate(44, 44);
+    var goalLoc = goal.generate(44, 44);
+    while (!validGoalLoc(goalLoc, snake)) {
+      goalLoc = goal.generate(44, 44);
+    }
   }
   return goal;
 }

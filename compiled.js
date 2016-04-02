@@ -42,7 +42,7 @@ Game.prototype.run = function() {
 }
 
 var tick = function() {
-  var goal = renderer.tick();
+  var goal = renderer.tick(player.getSnake());
   var pLoc = player.tick();
   var wasCollision = checkForCollision(pLoc, goal.location());
   if (wasCollision) {
@@ -119,6 +119,8 @@ Goal.prototype.generate = function(xBoundary, yBoundary) {
   xLoc = x;
   yLoc = y;
   exists = true;
+
+  return {x: xLoc, y: yLoc};
 }
 
 Goal.prototype.location = function() {
@@ -212,6 +214,10 @@ Player.prototype.reset = function() {
   points = 0;
   direction = 'RIGHT';
   snake = [];
+}
+
+Player.prototype.getSnake = function() {
+  return snake;
 }
 
 Player.prototype.addPoints = function(numPoints) {
@@ -341,9 +347,19 @@ context.canvas.width = WIDTH*SCALE;
 
 context.fillStyle = col
 
-Renderer.prototype.tick = function() {
+var validGoalLoc = function(goal, snake) {
+  for (var i = 0; i < snake.length; i++) {
+    if (goal.x === snake[i].x && goal.y === snake[i].y) return false;
+  }
+  return true;
+}
+
+Renderer.prototype.tick = function(snake) {
   if (!goal.exists()) {
-    goal.generate(44, 44);
+    var goalLoc = goal.generate(44, 44);
+    while (!validGoalLoc(goalLoc, snake)) {
+      goalLoc = goal.generate(44, 44);
+    }
   }
   return goal;
 }

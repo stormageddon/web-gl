@@ -33,6 +33,10 @@ Player.prototype.reset = function() {
   snake = [];
 }
 
+Player.prototype.getSnake = function() {
+  return snake;
+}
+
 Player.prototype.addPoints = function(numPoints) {
   points += numPoints;
 }
