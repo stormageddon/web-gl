@@ -1,3 +1,12 @@
 #canvas {
     background: #000;
 }
+
+#startButton {
+    float: right;
+}
+
+#points {
+    float: left;
+}
+    

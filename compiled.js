@@ -18,8 +18,8 @@ var Game = function() {
   if (player) {
     player.reset();
   }
-  document.getElementById("points").innerHTML = 'Points: 0';
   player = new Player(200, 200, 'RIGHT', '#1ec503', renderer);
+  renderer.drawPoints(0);
 };
 
 Game.prototype.newGame = function() {
@@ -49,13 +49,13 @@ var tick = function() {
     player.addPoints(10);
     player.grow();
     goal.regenerate();
-    document.getElementById("points").innerHTML = 'Points: ' + player.getPoints();
   }
 }
 
 var render = function() {
   renderer.draw();
   player.draw();
+  renderer.drawPoints(player.getPoints());
 }
 
 // Checks for collision with Goal
@@ -326,9 +326,9 @@ var Renderer = function() {
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
 
-var WIDTH = 450;
-var HEIGHT = 450;
-var SCALE = 1;
+var WIDTH = 160;
+var HEIGHT = 120;
+var SCALE = 4;
 
 var Goal = require('./Goal');
 var goal = new Goal();
@@ -373,9 +373,25 @@ Renderer.prototype.draw = function() {
 }
 
 Renderer.prototype.drawPause = function() {
+  var fontSize = 20;
+  drawText("Press 'P' to unpause", WIDTH*SCALE / 3, HEIGHT * SCALE / 2, fontSize);
+//  context.fillStyle = "#ffffff";
+//  context.font = "20px Georgia";
+//  context.fillText("Press 'P' to unpause", WIDTH*SCALE / 4, HEIGHT*SCALE / 2);
+//  context.fillStyle = "#000000";
+
+}
+
+Renderer.prototype.drawPoints = function(points) {
+  var fontSize = 15;
+  drawText('Points: ' + points, 10, 475, fontSize);
+}
+
+var drawText = function(text, x, y, fontSize) {
+  console.log("Drawing text:", text, x, y, fontSize);
   context.fillStyle = "#ffffff";
-  context.font = "20px Georgia";
-  context.fillText("Press 'P' to unpause", WIDTH*SCALE / 4, HEIGHT*SCALE / 2);
+  context.font = fontSize + "px Arial";
+  context.fillText(text, x, y);
   context.fillStyle = "#000000";
 }
 

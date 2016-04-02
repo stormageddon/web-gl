@@ -17,8 +17,8 @@ var Game = function() {
   if (player) {
     player.reset();
   }
-  document.getElementById("points").innerHTML = 'Points: 0';
   player = new Player(200, 200, 'RIGHT', '#1ec503', renderer);
+  renderer.drawPoints(0);
 };
 
 Game.prototype.newGame = function() {
@@ -48,13 +48,13 @@ var tick = function() {
     player.addPoints(10);
     player.grow();
     goal.regenerate();
-    document.getElementById("points").innerHTML = 'Points: ' + player.getPoints();
   }
 }
 
 var render = function() {
   renderer.draw();
   player.draw();
+  renderer.drawPoints(player.getPoints());
 }
 
 // Checks for collision with Goal
