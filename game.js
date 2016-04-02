@@ -1,7 +1,5 @@
 'use strict'
 
-console.log("Loaded game.js");
-
 var Game = Game || {};
 var Renderer = require('./Renderer');
 var Player = require('./Player');
@@ -10,16 +8,13 @@ var Input = require('./Input');
 
 var ONE_FRAME_TIME = 60;
 var renderer = new Renderer();
-var running = true;
+var running = false;
 var player = new Player(200, 200, 'RIGHT', 'green', renderer);
 
 var Game = function() {
-  console.log("Created a new Game");
 };
 
 Game.prototype.newGame = function() {
-  console.log("Starting a new game");
-  render();
 }
 
 var mainLoop = function(game) {
@@ -29,11 +24,11 @@ var mainLoop = function(game) {
 }
 
 Game.prototype.run = function() {
-  setInterval( mainLoop, ONE_FRAME_TIME )
+  setInterval( mainLoop, ONE_FRAME_TIME );
+  running = true;
 }
 
 var tick = function() {
-  console.log("TICK");
   var goal = renderer.tick();
   var pLoc = player.tick();
   var wasCollision = checkForCollision(pLoc, goal.location());

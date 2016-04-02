@@ -34,7 +34,7 @@ context.fillStyle = col
 
 Renderer.prototype.tick = function() {
   if (!goal.exists()) {
-    goal.generate(40, 40);
+    goal.generate(44, 44);
   }
   return goal;
 }
