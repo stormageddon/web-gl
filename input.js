@@ -1,7 +1,6 @@
 'use strict'
 
 var Input = function() {
-
 }
 
 document.onkeydown = function(e) {

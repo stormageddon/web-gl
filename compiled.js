@@ -144,7 +144,6 @@ module.exports = Goal
 'use strict'
 
 var Input = function() {
-
 }
 
 document.onkeydown = function(e) {
@@ -188,6 +187,7 @@ var Player = Player || {};
 var xLoc; // X coord of head
 var yLoc; // Y coord of head
 var snake = [];  // Contains snake cells
+var turns = []; // Hold next turn commands
 var SPEED = 2;
 var w = 10;
 var h = 10;
@@ -229,9 +229,14 @@ Player.prototype.getPoints = function() {
 }
 
 var move = function() {
+  //console.log('turns:', turns);
+  if (turns.length > 0) {
+    direction = turns.shift();
+  }
+
   if( direction === 'RIGHT' ) {
     snake[0].x++;
-    if(snake[0].x > (canvas.width / w) - 1) document.dispatchEvent( new Event('Game Over'))
+    if(snake[0].x > (r.getContext().canvas.width / w) - 1) document.dispatchEvent( new Event('Game Over'))
   }
   if( direction === 'LEFT' ) {
     snake[0].x--;
@@ -243,7 +248,7 @@ var move = function() {
   }
   if( direction === 'DOWN' ) {
     snake[0].y++;
-    if(snake[0].y > (canvas.height / h) - 1) document.dispatchEvent( new Event('Game Over'))
+    if(snake[0].y > (r.getContext().canvas.height / h) - 1) document.dispatchEvent( new Event('Game Over'))
   }
 
   moveSnake();
@@ -309,8 +314,9 @@ document.addEventListener('move', function(e) {
   ) {
     return
   }
+  turns.push(newDirection);
+  //direction = e.detail.toUpperCase();
 
-  setTimeout( function() { direction = e.detail.toUpperCase(); return; }, 20 );
 });
 
 module.exports = Player
@@ -409,14 +415,12 @@ var clear = function() {
 
 module.exports = Renderer
 },{"./Goal":2}],6:[function(require,module,exports){
-
-},{}],7:[function(require,module,exports){
 arguments[4][1][0].apply(exports,arguments)
-},{"./Goal":2,"./Input":3,"./Player":4,"./Renderer":5,"dup":1}],8:[function(require,module,exports){
+},{"./Goal":2,"./Input":3,"./Player":4,"./Renderer":5,"dup":1}],7:[function(require,module,exports){
 arguments[4][2][0].apply(exports,arguments)
-},{"dup":2}],9:[function(require,module,exports){
+},{"dup":2}],8:[function(require,module,exports){
 arguments[4][3][0].apply(exports,arguments)
-},{"dup":3}],10:[function(require,module,exports){
+},{"dup":3}],9:[function(require,module,exports){
 var Game = require('./Game');
 var game;
 
@@ -432,8 +436,8 @@ window.drawNewGame = function() {
   game = new Game();
   game.newGame();
 }
-},{"./Game":1}],11:[function(require,module,exports){
+},{"./Game":1}],10:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],12:[function(require,module,exports){
+},{"dup":4}],11:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
-},{"./Goal":2,"dup":5}]},{},[6,7,8,9,10,11,12]);
+},{"./Goal":2,"dup":5}]},{},[6,7,8,9,10,11]);

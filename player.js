@@ -5,6 +5,7 @@ var Player = Player || {};
 var xLoc; // X coord of head
 var yLoc; // Y coord of head
 var snake = [];  // Contains snake cells
+var turns = []; // Hold next turn commands
 var SPEED = 2;
 var w = 10;
 var h = 10;
@@ -46,9 +47,14 @@ Player.prototype.getPoints = function() {
 }
 
 var move = function() {
+  //console.log('turns:', turns);
+  if (turns.length > 0) {
+    direction = turns.shift();
+  }
+
   if( direction === 'RIGHT' ) {
     snake[0].x++;
-    if(snake[0].x > (canvas.width / w) - 1) document.dispatchEvent( new Event('Game Over'))
+    if(snake[0].x > (r.getContext().canvas.width / w) - 1) document.dispatchEvent( new Event('Game Over'))
   }
   if( direction === 'LEFT' ) {
     snake[0].x--;
@@ -60,7 +66,7 @@ var move = function() {
   }
   if( direction === 'DOWN' ) {
     snake[0].y++;
-    if(snake[0].y > (canvas.height / h) - 1) document.dispatchEvent( new Event('Game Over'))
+    if(snake[0].y > (r.getContext().canvas.height / h) - 1) document.dispatchEvent( new Event('Game Over'))
   }
 
   moveSnake();
@@ -126,8 +132,9 @@ document.addEventListener('move', function(e) {
   ) {
     return
   }
+  turns.push(newDirection);
+  //direction = e.detail.toUpperCase();
 
-  setTimeout( function() { direction = e.detail.toUpperCase(); return; }, 20 );
 });
 
 module.exports = Player
